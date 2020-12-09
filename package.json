@@ -1,7 +1,6 @@
 {
   "name": "Security-SecretsSite",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,5 +14,14 @@
     "express": "^4.17.1",
     "mongoose": "^5.11.5",
     "mongoose-encryption": "^2.0.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wyjbuss/Security-SecretsSite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Wyjbuss/Security-SecretsSite/issues"
+  },
+  "homepage": "https://github.com/Wyjbuss/Security-SecretsSite#readme",
+  "description": ""
 }
