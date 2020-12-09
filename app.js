@@ -1,9 +1,16 @@
-require('dotenv').config();
+require('dotenv').config(); // allows us to use .env (enviornment verables)
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption")
+
+//const encrypt = require("mongoose-encryption") // uninstalled
+//const md5 = require("md5"); // hashing encryption md5 is a kind of hashing
+
+const bcrypt = require("bcrypt"); // hashing with salt meanding adding a random
+// set of numbers refered to as salt
+// and salt rounds is taking the outcome and adding salt to it multiple times.
+const saltRounds = 10;
 
 const app = express();
 
@@ -29,13 +36,13 @@ const userSchema = new mongoose.Schema({
 	password: String
 });
 
-//ENCRYPTING
-const secret = process.env.SECRET;
-userSchema.plugin(encrypt, {
-	secret: secret,
-	encryptedFields: ["password"] // to encrypt multiple feilds add it to this
-	// like ['password',"username","somethingElse"]
-});
+//ENCRYPTING with mongoose-encryption
+// const secret = process.env.SECRET;
+// userSchema.plugin(encrypt, {
+// 	secret: secret,
+// 	encryptedFields: ["password"] // to encrypt multiple feilds add it to this
+// 	// like ['password',"username","somethingElse"]
+// });
 
 // add this last after the encription
 // or it wont encrypt
@@ -66,11 +73,16 @@ app.route("/login")
 				console.log(err);
 			} else {
 				if (foundUser) {
-					if (foundUser.password === usersPassword) {
-						res.render("secrets");
-					} else {
-						res.send("Password incorrect")
-					}
+					// Load hash from your password DB.
+					bcrypt.compare(usersPassword, foundUser.password, function(err, result) {
+						// result == true
+						if (result === true) {
+							res.render("secrets");
+						} else {
+							res.send("Password is incorrect")
+						}
+
+					});
 
 				}
 			}
@@ -82,6 +94,7 @@ app.route("/register")
 		res.render("register");
 	})
 	.post(function(req, res) {
+
 		User.findOne({ // if user already exists ...
 			email: req.body.username
 		}, function(err, foundUser) { // check to see if user already exists
@@ -92,18 +105,22 @@ app.route("/register")
 				res.send("User already exists. Try logging in.");
 			} else
 			if (!foundUser) { // if user wasnt found then make one
-				const newUser = new User({
-					email: req.body.username,
-					password: req.body.password
-				}); //end database entry
-				//save data
-				newUser.save(function(err) {
-					if (err) {
-						console.log(err);
-					} else {
-						res.render("secrets");
-					}
+				bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+					// Store hash in your password DB.
+					const newUser = new User({
+						email: req.body.username,
+						password: hash
+					}); //end database entry
+					//save data
+					newUser.save(function(err) {
+						if (err) {
+							console.log(err);
+						} else {
+							res.render("secrets");
+						}
+					});
 				});
+
 			}
 
 
