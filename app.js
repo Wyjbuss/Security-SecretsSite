@@ -83,8 +83,7 @@ app.route("/register")
 	})
 	.post(function(req, res) {
 		User.findOne({ // if user already exists ...
-			email: req.body.username,
-			password: req.body.password
+			email: req.body.username
 		}, function(err, foundUser) { // check to see if user already exists
 			if (err) {
 				console.log(err);
